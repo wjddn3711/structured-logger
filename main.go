@@ -32,7 +32,8 @@ func (le logEntry) ToFields() map[string]interface{} {
 
 func main() {
 	ctx := context.Background()
-	log := logger.NewLoggerWrapper(types.ZeroLog, ctx)
+	log := logger.NewLoggerWrapper(types.ZeroLog)
+	ctx = log.WithContext(ctx)
 
 	entry := logEntry{
 		StartTime:   "2021-01-01T00:00:00Z",
@@ -45,6 +46,23 @@ func main() {
 	}
 
 	log.RegisterCommonField("rid", "1234")
+
+	log.Debug(entry, logger.WithMessage("debug message"))
+
+	doSomething(ctx)
+}
+
+func doSomething(ctx context.Context) {
+	log := logger.FromContext(types.ZeroLog, ctx)
+	log.RegisterCommonField("rid", "5678")
+
+	entry := logEntry{
+		Elapsed:     1000,
+		StatusCode:  500,
+		URI:         "/",
+		Referer:     "https://www.naver.com",
+		PhoneNumber: "66666666",
+	}
 
 	log.Debug(entry, logger.WithMessage("debug message"))
 }

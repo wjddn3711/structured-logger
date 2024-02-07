@@ -11,7 +11,7 @@ type LogEntry interface {
 }
 
 type Logger interface {
-	WithContext(ctx context.Context) Logger
+	WithContext(ctx context.Context) context.Context
 	RegisterCommonField(key string, value interface{})
 	RegisterCommonFields(fields LogEntry)
 	Debug(fields LogEntry, opts ...LogOptions)

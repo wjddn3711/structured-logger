@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
+	"github.com/wjddn3711/structured-logger/logger/types"
 )
 
 type LogrusLogger struct {
@@ -19,8 +20,15 @@ func NewLogrusLogger() Logger {
 	return &LogrusLogger{logger: logger}
 }
 
-func (l *LogrusLogger) WithContext(ctx context.Context) Logger {
-	return &LogrusLogger{logger: l.logger, ctx: ctx}
+func (l *LogrusLogger) beforeSend(entry *logrus.Entry) {
+	if l.ctx != nil {
+		l.ctx = context.WithValue(l.ctx, types.LogrusKey, entry.Logger)
+	}
+	return
+}
+
+func (l *LogrusLogger) WithContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, types.LogrusKey, l)
 }
 
 func (l *LogrusLogger) RegisterCommonField(key string, value interface{}) {
@@ -38,6 +46,7 @@ func (l *LogrusLogger) Debug(entry LogEntry, opts ...LogOptions) {
 			logEntry = logEntry.WithField("message", opt.message)
 		}
 	}
+	l.beforeSend(logEntry)
 	logEntry.Debug()
 }
 
@@ -48,6 +57,7 @@ func (l *LogrusLogger) Info(entry LogEntry, opts ...LogOptions) {
 			logEntry = logEntry.WithField("message", opt.message)
 		}
 	}
+	l.beforeSend(logEntry)
 	logEntry.Info()
 }
 
@@ -58,6 +68,7 @@ func (l *LogrusLogger) Warn(entry LogEntry, opts ...LogOptions) {
 			logEntry = logEntry.WithField("message", opt.message)
 		}
 	}
+	l.beforeSend(logEntry)
 	logEntry.Warn()
 }
 
@@ -68,6 +79,7 @@ func (l *LogrusLogger) Error(entry LogEntry, opts ...LogOptions) {
 			logEntry = logEntry.WithField("message", opt.message)
 		}
 	}
+	l.beforeSend(logEntry)
 	logEntry.Error()
 }
 
@@ -78,5 +90,6 @@ func (l *LogrusLogger) Fatal(entry LogEntry, opts ...LogOptions) {
 			logEntry = logEntry.WithField("message", opt.message)
 		}
 	}
+	l.beforeSend(logEntry)
 	logEntry.Fatal()
 }
