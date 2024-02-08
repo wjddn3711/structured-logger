@@ -54,9 +54,9 @@ func (l *zerologLogger) ApplyOption(opts []options.EntryOption) {
 
 	if entryOtp.Message != "" {
 		if l.entry != nil {
-			l.entry["message"] = entryOtp.Message
+			l.entry[types.MessageField] = entryOtp.Message
 		} else {
-			l.entry = map[string]interface{}{"message": entryOtp.Message}
+			l.entry = map[string]interface{}{types.MessageField: entryOtp.Message}
 		}
 	}
 	if entryOtp.Fields != nil {

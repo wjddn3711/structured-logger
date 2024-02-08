@@ -8,6 +8,12 @@ import (
 	"github.com/wjddn3711/structured-logger/logger/types"
 )
 
+var data = map[string]interface{}{}
+
+func init() {
+	data["default"] = &logrusLogger{}
+}
+
 type logrusLogger struct {
 	logger *logrus.Logger
 	entry  *logrus.Entry
@@ -58,7 +64,7 @@ func (l *logrusLogger) ApplyOption(opts []options.EntryOption) {
 	}
 
 	if entryOpt.Message != "" {
-		l.entry = l.entry.WithField("message", entryOpt.Message)
+		l.entry = l.entry.WithField(types.MessageField, entryOpt.Message)
 	}
 	if entryOpt.Fields != nil {
 		l.entry = l.entry.WithFields(logrus.Fields(entryOpt.Fields.ToFields()))
