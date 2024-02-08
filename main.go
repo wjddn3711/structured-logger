@@ -6,21 +6,23 @@ import (
 	"github.com/ggwhite/go-masker"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/wjddn3711/structured-logger/logger"
+	"github.com/wjddn3711/structured-logger/logger/options"
 	"github.com/wjddn3711/structured-logger/logger/types"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type logEntry struct {
-	StartTime   string `json:"start_time"`
-	EndTime     string `json:"end_time"`
-	Elapsed     int64  `json:"elapsed"`
-	StatusCode  int    `json:"status_code"`
-	URI         string `json:"uri"`
-	Referer     string `json:"referer"`
-	PhoneNumber string `json:"phone_number" mask:"mobile"`
+	StartTime   string `json:"start_time,omitempty"`
+	EndTime     string `json:"end_time,omitempty"`
+	Elapsed     int64  `json:"elapsed,omitempty"`
+	StatusCode  int    `json:"status_code,omitempty"`
+	URI         string `json:"uri,omitempty"`
+	Referer     string `json:"referer,omitempty"`
+	PhoneNumber string `json:"phone_number,omitempty" mask:"mobile"`
 }
 
+// ToFields converts logEntry to map[string]interface{}
 func (le logEntry) ToFields() map[string]interface{} {
 	entryMap := make(map[string]interface{})
 	t, _ := masker.Struct(le)
@@ -32,7 +34,7 @@ func (le logEntry) ToFields() map[string]interface{} {
 
 func main() {
 	ctx := context.Background()
-	log := logger.NewLoggerWrapper(types.ZeroLog)
+	log := logger.NewWrapper(types.ZeroLog)
 	ctx = log.WithContext(ctx)
 
 	entry := logEntry{
@@ -47,14 +49,13 @@ func main() {
 
 	log.RegisterCommonField("rid", "1234")
 
-	log.Debug(entry, logger.WithMessage("debug message"))
+	log.Info(options.WithMessage("debug message"), options.WithFields(entry))
 
 	doSomething(ctx)
 }
 
 func doSomething(ctx context.Context) {
-	log := logger.FromContext(types.ZeroLog, ctx)
-	log.RegisterCommonField("rid", "5678")
+	log := logger.FromContext(ctx, types.ZeroLog)
 
 	entry := logEntry{
 		Elapsed:     1000,
@@ -64,5 +65,5 @@ func doSomething(ctx context.Context) {
 		PhoneNumber: "66666666",
 	}
 
-	log.Debug(entry, logger.WithMessage("debug message"))
+	log.Info(options.WithMessage("error message"), options.WithFields(entry))
 }
